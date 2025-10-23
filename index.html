@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Árboles Genealógicos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌳 Generador de Árboles Genealógicos</h1>
+            <nav class="tabs">
+                <button class="tab-btn active" data-tab="datos">📝 Agregar Datos</button>
+                <button class="tab-btn" data-tab="visualizar">🌲 Visualizar Árbol</button>
+                <button class="tab-btn" data-tab="exportar">💾 Importar/Exportar</button>
+                <button class="tab-btn" data-tab="ayuda">❓ Ayuda</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- Tab: Agregar Datos -->
+            <section id="tab-datos" class="tab-content active">
+                <div class="data-entry-layout">
+                    <div class="form-container">
+                        <div class="card">
+                            <div class="card__body">
+                                <h2>Información de la Persona</h2>
+                                <form id="person-form" class="person-form">
+                                    <div class="form-group">
+                                        <label class="form-label" for="nombre">Nombre Completo *</label>
+                                        <input type="text" id="nombre" name="nombre" class="form-control" required>
+                                    </div>
+                                    
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label class="form-label" for="genero">Género</label>
+                                            <select id="genero" name="genero" class="form-control">
+                                                <option value="masculino">Masculino</option>
+                                                <option value="femenino">Femenino</option>
+                                                <option value="otro">Otro</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label" for="nacimiento">Año de Nacimiento</label>
+                                            <input type="number" id="nacimiento" name="nacimiento" class="form-control" min="1800" max="2025">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label" for="fallecimiento">Año de Fallecimiento</label>
+                                            <input type="number" id="fallecimiento" name="fallecimiento" class="form-control" min="1800" max="2025">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label" for="foto">URL de Foto (opcional)</label>
+                                        <input type="url" id="foto" name="foto" class="form-control">
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label" for="notas">Notas Adicionales</label>
+                                        <textarea id="notas" name="notas" class="form-control" rows="3"></textarea>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Relaciones Familiares</h3>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="padres">Padres</label>
+                                    <select id="padre1" class="form-control" style="margin-bottom: 8px;">
+                                        <option value="">Seleccionar Padre 1</option>
+                                    </select>
+                                    <select id="padre2" class="form-control">
+                                        <option value="">Seleccionar Padre 2</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label" for="conyuge">Cónyuge</label>
+                                    <select id="conyuge" name="conyuge" class="form-control">
+                                        <option value="">Seleccionar Cónyuge</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" id="add-person" class="btn btn--primary">➕ Agregar Persona</button>
+                            <button type="button" id="update-person" class="btn btn--secondary hidden">✏️ Actualizar Persona</button>
+                            <button type="button" id="cancel-edit" class="btn btn--outline hidden">❌ Cancelar</button>
+                            <button type="button" id="clear-form" class="btn btn--outline">🗑️ Limpiar</button>
+                            <button type="button" id="load-sample" class="btn btn--outline">📋 Cargar Ejemplo</button>
+                        </div>
+                    </div>
+                    
+                    <div class="people-list">
+                        <div class="card">
+                            <div class="card__body">
+                                <h3>Personas Agregadas (<span id="person-count">0</span>)</h3>
+                                <div class="search-box">
+                                    <input type="text" id="search-person" class="form-control" placeholder="🔍 Buscar persona...">
+                                </div>
+                                <ul id="people-list" class="people-list-items"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="error-message" class="error-message hidden"></div>
+                <div id="success-message" class="success-message hidden"></div>
+            </section>
+
+            <!-- Tab: Visualizar Árbol -->
+            <section id="tab-visualizar" class="tab-content">
+                <div class="tree-controls">
+                    <div class="controls-row">
+                        <div class="control-group">
+                            <label for="root-person">Persona Raíz:</label>
+                            <select id="root-person" class="form-control">
+                                <option value="">Seleccionar...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="tree-type">Tipo de Árbol:</label>
+                            <select id="tree-type" class="form-control">
+                                <option value="descendants">Descendientes</option>
+                                <option value="ancestors">Ancestros</option>
+                                <option value="full">Árbol Completo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label for="generations">Generaciones:</label>
+                            <select id="generations" class="form-control">
+                                <option value="2">2</option>
+                                <option value="3" selected>3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="10">Todas</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="controls-row">
+                        <button id="zoom-in" class="btn btn--sm btn--outline">🔍+ Zoom In</button>
+                        <button id="zoom-out" class="btn btn--sm btn--outline">🔍- Zoom Out</button>
+                        <button id="reset-view" class="btn btn--sm btn--outline">🏠 Centrar</button>
+                        <div class="tree-stats">
+                            <span id="tree-stats">Estadísticas del árbol aparecerán aquí</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tree-container">
+                    <div id="tree-viewport" class="tree-viewport">
+                        <svg id="family-tree" class="family-tree-svg">
+                            <g id="tree-content"></g>
+                        </svg>
+                        <div id="no-data-message" class="no-data-message">
+                            <p>🌱 No hay personas agregadas aún.</p>
+                            <p>Ve al tab "Agregar Datos" para comenzar tu árbol genealógico.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="person-tooltip" class="person-tooltip hidden"></div>
+            </section>
+
+            <!-- Tab: Importar/Exportar -->
+            <section id="tab-exportar" class="tab-content">
+                <div class="export-layout">
+                    <div class="card">
+                        <div class="card__body">
+                            <h2>📤 Exportar Árbol</h2>
+                            
+                            <div class="export-options">
+                                <div class="export-format">
+                                    <label class="radio-label">
+                                        <input type="radio" name="export-format" value="svg" checked>
+                                        <span class="radio-custom"></span>
+                                        <strong>SVG</strong> - Gráfico vectorial escalable
+                                    </label>
+                                    <p class="format-description">Calidad perfecta en cualquier tamaño, ideal para impresión profesional</p>
+                                </div>
+                                
+                                <div class="export-format">
+                                    <label class="radio-label">
+                                        <input type="radio" name="export-format" value="png">
+                                        <span class="radio-custom"></span>
+                                        <strong>PNG</strong> - Imagen de alta resolución
+                                    </label>
+                                    <p class="format-description">Fácil de compartir, funciona en cualquier aplicación</p>
+                                    <div class="format-options hidden" id="png-options">
+                                        <label for="dpi-select">DPI:</label>
+                                        <select id="dpi-select" class="form-control">
+                                            <option value="72">72 DPI (pantalla)</option>
+                                            <option value="150" selected>150 DPI (buena calidad)</option>
+                                            <option value="300">300 DPI (impresión)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="export-format">
+                                    <label class="radio-label">
+                                        <input type="radio" name="export-format" value="json">
+                                        <span class="radio-custom"></span>
+                                        <strong>JSON</strong> - Datos del árbol
+                                    </label>
+                                    <p class="format-description">Permite guardar y continuar editando más tarde</p>
+                                </div>
+                            </div>
+                            
+                            <div class="export-config">
+                                <h4>Opciones de Exportación</h4>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="include-photos" checked>
+                                    <span class="checkbox-custom"></span>
+                                    Incluir fotos
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="include-dates" checked>
+                                    <span class="checkbox-custom"></span>
+                                    Incluir fechas
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="include-notes">
+                                    <span class="checkbox-custom"></span>
+                                    Incluir notas
+                                </label>
+                            </div>
+                            
+                            <button id="export-tree" class="btn btn--primary btn--full-width">💾 Exportar Árbol</button>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card__body">
+                            <h2>📥 Importar Datos</h2>
+                            
+                            <div class="import-area" id="import-area">
+                                <div class="drag-drop-zone">
+                                    <p>🗂️ Arrastra un archivo JSON aquí</p>
+                                    <p>o</p>
+                                    <label for="file-input" class="btn btn--secondary">Seleccionar Archivo</label>
+                                    <input type="file" id="file-input" accept=".json" class="hidden">
+                                </div>
+                            </div>
+                            
+                            <div class="import-info">
+                                <h4>ℹ️ Información</h4>
+                                <p>Solo se pueden importar archivos JSON exportados desde esta aplicación.</p>
+                                <p>Los datos actuales serán reemplazados por los del archivo importado.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab: Ayuda -->
+            <section id="tab-ayuda" class="tab-content">
+                <div class="help-content">
+                    <div class="card">
+                        <div class="card__body">
+                            <h2>📖 Guía de Uso</h2>
+                            
+                            <div class="help-section">
+                                <h3>1️⃣ Agregar Personas</h3>
+                                <ul>
+                                    <li>Ve al tab "Agregar Datos"</li>
+                                    <li>Llena el formulario con la información de la persona</li>
+                                    <li>Solo el nombre es obligatorio</li>
+                                    <li>Haz clic en "Agregar Persona" para guardar</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="help-section">
+                                <h3>2️⃣ Definir Relaciones</h3>
+                                <ul>
+                                    <li>Selecciona padres desde los dropdowns</li>
+                                    <li>Selecciona cónyuge si aplica</li>
+                                    <li>Las relaciones se crean automáticamente</li>
+                                    <li>Puedes editar personas existentes haciendo clic en ellas</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="help-section">
+                                <h3>3️⃣ Visualizar el Árbol</h3>
+                                <ul>
+                                    <li>Ve al tab "Visualizar Árbol"</li>
+                                    <li>Selecciona la persona raíz (desde donde mostrar el árbol)</li>
+                                    <li>Elige el tipo de árbol: ancestros, descendientes o completo</li>
+                                    <li>Usa los controles de zoom para navegar</li>
+                                    <li>Haz clic en las personas para ver más detalles</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="help-section">
+                                <h3>4️⃣ Exportar tu Árbol</h3>
+                                <ul>
+                                    <li>Ve al tab "Importar/Exportar"</li>
+                                    <li><strong>SVG:</strong> Para impresión profesional y edición</li>
+                                    <li><strong>PNG:</strong> Para compartir como imagen</li>
+                                    <li><strong>JSON:</strong> Para guardar y continuar editando después</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="help-section">
+                                <h3>💡 Consejos</h3>
+                                <ul>
+                                    <li>Usa "Cargar Ejemplo" para ver cómo funciona la aplicación</li>
+                                    <li>Los colores representan géneros: azul (M), rosa (F), verde (otro)</li>
+                                    <li>Puedes buscar personas específicas usando la caja de búsqueda</li>
+                                    <li>Guarda tu progreso exportando a JSON regularmente</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
